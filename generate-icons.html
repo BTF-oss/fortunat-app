@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur d'icônes FORTUNAT</title>
+</head>
+<body style="background: #000; color: #fff; font-family: Arial; padding: 20px;">
+    <h1>GÉNÉRATEUR D'ICÔNES FORTUNAT</h1>
+    <p>Clique sur les boutons pour télécharger les icônes :</p>
+    
+    <button onclick="generateIcon(192)" style="padding: 15px 30px; margin: 10px; font-size: 16px; cursor: pointer;">
+        Télécharger icon-192.png
+    </button>
+    
+    <button onclick="generateIcon(512)" style="padding: 15px 30px; margin: 10px; font-size: 16px; cursor: pointer;">
+        Télécharger icon-512.png
+    </button>
+    
+    <div id="preview" style="margin-top: 30px;"></div>
+    
+    <script>
+        function generateIcon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, size, size);
+            
+            ctx.fillStyle = '#00d4ff';
+            ctx.font = `bold ${size * 0.7}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('F', size / 2, size / 2);
+            
+            ctx.shadowColor = '#00d4ff';
+            ctx.shadowBlur = size * 0.1;
+            ctx.fillText('F', size / 2, size / 2);
+            
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `icon-${size}.png`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                const img = document.createElement('img');
+                img.src = url;
+                img.style.width = '150px';
+                img.style.margin = '10px';
+                img.style.border = '2px solid #00d4ff';
+                document.getElementById('preview').appendChild(img);
+            });
+        }
+    </script>
+</body>
+</html>

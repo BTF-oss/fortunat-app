@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORTUNAT§EXEMPLE</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00d4ff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FORTUNAT">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <style>
+        @import url('https://fonts.cdnfonts.com/css/algerian');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* SPLASH SCREEN */
+        #splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeOut 1s ease 5s forwards;
+        }
+        
+        #splash h1 {
+            font-family: 'Algerian', serif;
+            font-size: 4em;
+            color: #00d4ff;
+            text-shadow: 0 0 20px #00d4ff, 0 0 40px #00d4ff, 0 0 60px #00d4ff;
+            animation: glow 2s ease-in-out infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px #00d4ff, 0 0 40px #00d4ff, 0 0 60px #00d4ff; }
+            50% { text-shadow: 0 0 30px #00d4ff, 0 0 60px #00d4ff, 0 0 90px #00d4ff; }
+        }
+        
+        @keyframes fadeOut {
+            to { opacity: 0; visibility: hidden; }
+        }
+        
+        /* USER SELECTION */
+        #userSelection {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        #userSelection.active {
+            display: flex;
+        }
+        
+        .user-box {
+            background: #1a1a1a;
+            border: 2px solid #444;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .user-box h2 {
+            color: #999;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .user-box input {
+            background: #222;
+            border: 1px solid #555;
+            color: #fff;
+            padding: 15px;
+            font-size: 1.2em;
+            width: 300px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .user-box button {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .user-box button:hover {
+            background: #ddd;
+        }
+        
+        /* MAIN APP */
+        #app {
+            display: none;
+            padding: 20px;
+            opacity: 0;
+            animation: fadeIn 1s ease 6s forwards;
+        }
+        
+        #app.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        
+        /* HEADER */
+        #header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        #header h1 {
+            font-family: 'Algerian', serif;
+            font-size: 2.5em;
+            color: #00d4ff;
+            text-shadow: 0 0 15px #00d4ff, 0 0 30px #00d4ff;
+            animation: headerGlow 3s ease-in-out infinite;
+        }
+        
+        @keyframes headerGlow {
+            0%, 100% { text-shadow: 0 0 15px #00d4ff, 0 0 30px #00d4ff; }
+            50% { text-shadow: 0 0 25px #00d4ff, 0 0 50px #00d4ff; }
+        }
+        
+        /* LAYOUT */
+        #mainContainer {
+            display: flex;
+            gap: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        #leftPanel {
+            flex: 0 0 250px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        #rightPanel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        /* RECTANGLES MODIFIABLES */
+        .input-box {
+            background: #fff;
+            border: 2px solid #666;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .input-box label {
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .input-box.b-box label { color: #FFD700; }
+        .input-box.m-box label { color: #000; }
+        .input-box.l-box label { color: #00ff00; }
+        
+        .input-box input {
+            background: transparent;
+            border: none;
+            font-size: 1.5em;
+            font-weight: bold;
+            width: 100%;
+            outline: none;
+        }
+        
+        .input-box.b-box input { color: #FFD700; }
+        .input-box.m-box input { color: #000; }
+        .input-box.l-box input { color: #00ff00; }
+        
+        /* CASES GRISES */
+        .data-box {
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 6px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .data-box label {
+            color: #999;
+            font-size: 0.9em;
+        }
+        
+        .data-box span {
+            color: #fff;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        
+        .data-box.tp-box {
+            background: #fff;
+        }
+        
+        .data-box.tp-box label,
+        .data-box.tp-box span {
+            color: #00ff00;
+        }
+        
+        .data-box.sl-box {
+            background: #fff;
+        }
+        
+        .data-box.sl-box label,
+        .data-box.sl-box span {
+            color: #ff0000;
+        }
+        
+        /* GRAPHIQUE */
+        #chartContainer {
+            position: relative;
+            background: #0a0a0a;
+            border: 2px solid #333;
+            border-radius: 10px;
+            height: 600px;
+            overflow: hidden;
+        }
+        
+        #chartCanvas {
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+        
+        /* BOUTONS CONTROLE */
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .control-buttons button {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        .control-buttons button:hover {
+            background: #ddd;
+        }
+        
+        .control-buttons button:disabled {
+            background: #555;
+            color: #999;
+            cursor: not-allowed;
+        }
+        
+        .control-buttons button.locked {
+            background: #00ff00;
+        }
+        
+        .control-buttons button.active {
+            background: #00d4ff;
+        }
+        
+        /* NOTIFICATION */
+        #notification {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #000;
+            border: 3px solid #666;
+            border-radius: 15px;
+            padding: 40px 60px;
+            z-index: 10000;
+            text-align: center;
+            min-width: 400px;
+        }
+        
+        #notification.active {
+            display: block;
+        }
+        
+        #notification p {
+            color: #999;
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        #notification button {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        #notification button:hover {
+            background: #ddd;
+        }
+        
+        /* OVERLAY */
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9998;
+        }
+        
+        #overlay.active {
+            display: block;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 1200px) {
+            #mainContainer {
+                flex-direction: column;
+            }
+            
+            #leftPanel {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- SPLASH SCREEN -->
+    <div id="splash">
+        <h1>FORTUNAT§EXEMPLE</h1>
+    </div>
+    
+    <!-- USER SELECTION -->
+    <div id="userSelection">
+        <div class="user-box">
+            <h2>NOM D'UTILISATEUR</h2>
+            <input type="text" id="usernameInput" placeholder="Ben / Fortunat / BTFHR" onkeypress="if(event.key==='Enter') selectUser()">
+            <button onclick="selectUser()">ENTRER</button>
+        </div>
+    </div>
+    
+    <!-- MAIN APP -->
+    <div id="app">
+        <div id="header">
+            <h1>FORTUNAT§EXEMPLE</h1>
+        </div>
+        
+        <div id="mainContainer">
+            <!-- LEFT PANEL -->
+            <div id="leftPanel">
+                <!-- B VALUE -->
+                <div class="input-box b-box">
+                    <label>B</label>
+                    <input type="text" id="bValue" value="5.00" readonly>
+                </div>
+                
+                <!-- M VALUE -->
+                <div class="input-box m-box">
+                    <label>M</label>
+                    <input type="number" id="mValue" value="1.00" step="0.01" min="0.01">
+                </div>
+                
+                <!-- L VALUE -->
+                <div class="input-box l-box">
+                    <label>L</label>
+                    <input type="number" id="lValue" value="1.00" step="0.01" min="0.01">
+                </div>
+                
+                <!-- DATA BOXES -->
+                <div class="data-box tp-box">
+                    <label>TP (%)</label>
+                    <span id="tpPercent">0.00</span>
+                </div>
+                
+                <div class="data-box sl-box">
+                    <label>SL (%)</label>
+                    <span id="slPercent">0.00</span>
+                </div>
+                
+                <div class="data-box">
+                    <label>PP</label>
+                    <span id="ppValue">5.00</span>
+                </div>
+                
+                <div class="data-box">
+                    <label>Btp</label>
+                    <span id="btpValue">7.50</span>
+                </div>
+                
+                <div class="data-box">
+                    <label>Bsl</label>
+                    <span id="bslValue">2.50</span>
+                </div>
+                
+                <div class="data-box">
+                    <label>K</label>
+                    <span id="kValue">0.00</span>
+                </div>
+                
+                <div class="data-box">
+                    <label>X (%)</label>
+                    <span id="xValue">0.00</span>
+                </div>
+                
+                <div class="data-box">
+                    <label>G↑ ($)</label>
+                    <span id="gainValue">0.00</span>
+                </div>
+                
+                <div class="data-box">
+                    <label>P↓ ($)</label>
+                    <span id="lossValue">0.00</span>
+                </div>
+            </div>
+            
+            <!-- RIGHT PANEL -->
+            <div id="rightPanel">
+                <!-- CONTROL BUTTONS -->
+                <div class="control-buttons">
+                    <div style="display: flex; flex-direction: column; gap: 10px; background: #1a1a1a; padding: 15px; border-radius: 8px;">
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <label style="color: #00ff00; font-weight: bold; min-width: 80px;">TP (%):</label>
+                            <input type="number" id="tpPercentInput" min="0" max="1000" step="1" value="50" style="background: #222; color: #fff; border: 1px solid #00ff00; padding: 8px; width: 100px; border-radius: 4px; font-size: 1em;">
+                            <button id="lockTPBtn" onclick="toggleLockTP()" style="background: #fff; color: #000; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold;">VERROUILLER TP</button>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <label style="color: #ff0000; font-weight: bold; min-width: 80px;">SL (%):</label>
+                            <input type="number" id="slPercentInput" min="0" max="100" step="1" value="50" style="background: #222; color: #fff; border: 1px solid #ff0000; padding: 8px; width: 100px; border-radius: 4px; font-size: 1em;">
+                            <button id="lockSLBtn" onclick="toggleLockSL()" style="background: #fff; color: #000; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; font-weight: bold;">VERROUILLER SL</button>
+                        </div>
+                        
+                        <button id="startBtn" onclick="startInvestment()" disabled style="background: #555; color: #999; border: none; padding: 12px 25px; font-size: 1.1em; cursor: not-allowed; border-radius: 5px; font-weight: bold; margin-top: 10px;">DÉMARRER</button>
+                    </div>
+                </div>
+                
+                <!-- CHART -->
+                <div id="chartContainer">
+                    <canvas id="chartCanvas"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- NOTIFICATION -->
+    <div id="overlay"></div>
+    <div id="notification">
+        <p id="notificationText"></p>
+        <button onclick="closeNotification()">OK</button>
+    </div>
+    
+    <script>
+        // VARIABLES GLOBALES
+        let currentUser = null;
+        let canvas, ctx;
+        let animationId;
+        
+        // État du système (Partie II - FORMULES FINALES)
+        let state = {
+            B: 5.0,
+            M: 1.0,
+            L: 1.0,
+            E_PP: 5.0, // Position d'entrée sur l'échelle E (fixe à 5.00)
+            X_max: 10, // TP maximum = 1000% (X_max = 10)
+            TP: 7.5,
+            SL: 2.5,
+            tpLocked: false,
+            slLocked: false,
+            isRunning: false
+        };
+        
+        // Zoom
+        let zoom = {
+            level: 1.0,
+            offsetY: 0,
+            isPanning: false,
+            startY: 0,
+            startOffsetY: 0
+        };
+        
+        // Mouvement de B
+        let bMovement = {
+            direction: 1,
+            timeInDirection: 0,
+            slowDuration: 597000,
+            fastDuration: 3000,
+            isFast: false
+        };
+        
+        // Drag and drop
+        let isDragging = false;
+        let dragTarget = null;
+        let hoverInfo = null;
+        
+        // INIT
+        setTimeout(() => {
+            document.getElementById('userSelection').classList.add('active');
+        }, 6000);
+        
+        function selectUser() {
+            const username = document.getElementById('usernameInput').value.trim();
+            if (username === 'Ben' || username === 'Fortunat' || username === 'BTFHR') {
+                currentUser = username;
+                loadUserData();
+                document.getElementById('userSelection').classList.remove('active');
+                document.getElementById('app').classList.add('active');
+                setTimeout(() => {
+                    initChart();
+                    startBMovement();
+                }, 100);
+            } else {
+                alert('Nom d\'utilisateur invalide. Utilisez: Ben, Fortunat ou BTFHR');
+            }
+        }
+        
+        function loadUserData() {
+            const saved = localStorage.getItem(`fortunat_${currentUser}`);
+            if (saved) {
+                const savedState = JSON.parse(saved);
+                // Charger seulement les données persistantes, pas B qui doit bouger
+                state.M = savedState.M || 1.0;
+                state.L = savedState.L || 1.0;
+                
+                // VALIDER TP et SL (doivent être entre 0 et 10)
+                state.TP = savedState.TP || 7.5;
+                if (state.TP < 0 || state.TP > 10 || !isFinite(state.TP)) {
+                    state.TP = 7.5; // Réinitialiser si corrompu
+                }
+                
+                state.SL = savedState.SL || 2.5;
+                if (state.SL < 0 || state.SL > 10 || !isFinite(state.SL)) {
+                    state.SL = 2.5; // Réinitialiser si corrompu
+                }
+                
+                state.K = savedState.K || 0;
+                state.tpLocked = savedState.tpLocked || false;
+                state.slLocked = savedState.slLocked || false;
+                // B continue de bouger indépendamment
+                state.B = 5.0 + (Math.random() - 0.5) * 2; // Position aléatoire au démarrage
+            } else {
+                // Valeurs par défaut pour nouvel utilisateur
+                state.M = 1.0;
+                state.L = 1.0;
+                state.TP = 7.5;
+                state.SL = 2.5;
+                state.K = 0;
+                state.tpLocked = false;
+                state.slLocked = false;
+                state.B = 5.0;
+            }
+            updateUI();
+        }
+        
+        function saveUserData() {
+            if (!currentUser) return;
+            const dataToSave = {
+                M: state.M,
+                L: state.L,
+                TP: state.TP,
+                SL: state.SL,
+                K: state.K,
+                tpLocked: state.tpLocked,
+                slLocked: state.slLocked
+                // Ne PAS sauvegarder B car il doit continuer à bouger
+            };
+            localStorage.setItem(`fortunat_${currentUser}`, JSON.stringify(dataToSave));
+        }
+        
+        function initChart() {
+            canvas = document.getElementById('chartCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Redimensionner le canvas
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Events
+            canvas.addEventListener('mousedown', onMouseDown);
+            canvas.addEventListener('mousemove', onMouseMove);
+            canvas.addEventListener('mouseup', onMouseUp);
+            canvas.addEventListener('mouseleave', onMouseUp);
+            canvas.addEventListener('wheel', onWheel);
+            canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+            
+            // Navigation au clavier SEULEMENT si canvas a le focus
+            canvas.tabIndex = 1; // Rendre le canvas focusable
+            canvas.addEventListener('keydown', onKeyDown);
+            
+            // Dessiner
+            drawChart();
+        }
+        
+        function resizeCanvas() {
+            const container = document.getElementById('chartContainer');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            drawChart();
+        }
+        
+        function drawChart() {
+            if (!canvas || !ctx) return;
+            
+            const w = canvas.width;
+            const h = canvas.height;
+            
+            // Fond
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, 0, w, h);
+            
+            // Marges
+            const marginLeft = 80;
+            const marginRight = 100;
+            const marginTop = 40;
+            const marginBottom = 40;
+            
+            const chartW = w - marginLeft - marginRight;
+            const chartH = h - marginTop - marginBottom;
+            
+            // Échelle E avec zoom (limité aux centièmes)
+            const eMin = 0;
+            const eMax = 10;
+            const visibleRange = (eMax - eMin) / zoom.level;
+            const centerE = 5 + zoom.offsetY;
+            const viewMin = Math.max(eMin, centerE - visibleRange / 2);
+            const viewMax = Math.min(eMax, centerE + visibleRange / 2);
+            
+            function eToY(e) {
+                return marginTop + chartH - ((e - viewMin) / (viewMax - viewMin)) * chartH;
+            }
+            
+            function yToE(y) {
+                return viewMin + (1 - (y - marginTop) / chartH) * (viewMax - viewMin);
+            }
+            
+            // Déterminer l'intervalle selon le zoom (MAX centièmes)
+            let interval = 1.0;
+            let fontSize = 11;
+            if (zoom.level > 1.5 && zoom.level <= 8) {
+                interval = 0.1; // Dixièmes
+                fontSize = 12;
+            } else if (zoom.level > 8) {
+                interval = 0.01; // Centièmes (LIMITE MAX)
+                fontSize = 14;
+            }
+            
+            // Grille et labels
+            ctx.strokeStyle = '#222';
+            ctx.fillStyle = '#666';
+            ctx.font = `${fontSize}px Arial`;
+            ctx.lineWidth = 0.5;
+            
+            let e = Math.floor(viewMin / interval) * interval;
+            while (e <= viewMax) {
+                const y = eToY(e);
+                
+                if (y >= marginTop && y <= marginTop + chartH) {
+                    // Ligne horizontale plus fine pour la grille
+                    ctx.globalAlpha = 0.3;
+                    ctx.beginPath();
+                    ctx.moveTo(marginLeft, y);
+                    ctx.lineTo(marginLeft + chartW, y);
+                    ctx.stroke();
+                    ctx.globalAlpha = 1.0;
+                    
+                    // Label avec précision adaptative (max centièmes)
+                    let labelText = '';
+                    if (interval >= 1) {
+                        labelText = e.toFixed(0);
+                    } else if (interval >= 0.1) {
+                        labelText = e.toFixed(1);
+                    } else {
+                        labelText = e.toFixed(2); // Centièmes max
+                    }
+                    
+                    ctx.fillText(labelText, 10, y + 4);
+                }
+                
+                e += interval;
+            }
+            
+            // Épaisseur des lignes selon le zoom
+            const lineWidth = Math.max(1.5, 3 / zoom.level);
+            const labelFontSize = Math.max(13, 13 + zoom.level / 3);
+            
+            // Lignes de trading
+            ctx.globalAlpha = 1.0;
+            
+            // PP (bleu) - E_PP
+            if (state.E_PP >= viewMin && state.E_PP <= viewMax) {
+                ctx.strokeStyle = '#0088ff';
+                ctx.lineWidth = lineWidth;
+                ctx.beginPath();
+                ctx.moveTo(marginLeft, eToY(state.E_PP));
+                ctx.lineTo(marginLeft + chartW, eToY(state.E_PP));
+                ctx.stroke();
+                
+                // Label
+                ctx.font = `bold ${labelFontSize}px Arial`;
+                ctx.fillStyle = '#0088ff';
+                ctx.fillText('PP', marginLeft + chartW + 5, eToY(state.E_PP) + 5);
+                ctx.fillText(state.E_PP.toFixed(2), marginLeft + chartW + 30, eToY(state.E_PP) + 5);
+            }
+            
+            // TP (vert) - Ligne autonome
+            if (state.TP >= viewMin && state.TP <= viewMax) {
+                const tpY = eToY(state.TP);
+                
+                ctx.strokeStyle = '#00ff00';
+                ctx.lineWidth = lineWidth;
+                ctx.beginPath();
+                ctx.moveTo(marginLeft, tpY);
+                ctx.lineTo(marginLeft + chartW, tpY);
+                ctx.stroke();
+                
+                // Label avec %
+                ctx.font = `bold ${labelFontSize}px Arial`;
+                ctx.fillStyle = '#00ff00';
+                const tpPercent = calculatePercentAtPosition(state.TP, true);
+                ctx.fillText('TP', marginLeft + chartW + 5, tpY + 5);
+                ctx.fillText(`${tpPercent.toFixed(2)}%`, marginLeft + chartW + 30, tpY + 5);
+            }
+            
+            // SL (rouge) - Ligne autonome
+            if (state.SL >= viewMin && state.SL <= viewMax) {
+                const slY = eToY(state.SL);
+                
+                ctx.strokeStyle = '#ff0000';
+                ctx.lineWidth = lineWidth;
+                ctx.beginPath();
+                ctx.moveTo(marginLeft, slY);
+                ctx.lineTo(marginLeft + chartW, slY);
+                ctx.stroke();
+                
+                // Label avec %
+                ctx.font = `bold ${labelFontSize}px Arial`;
+                ctx.fillStyle = '#ff0000';
+                const slPercent = calculatePercentAtPosition(state.SL, false);
+                ctx.fillText('SL', marginLeft + chartW + 5, slY + 5);
+                ctx.fillText(`${slPercent.toFixed(2)}%`, marginLeft + chartW + 30, slY + 5);
+            }
+            
+            // B (jaune)
+            if (state.B >= viewMin && state.B <= viewMax) {
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = lineWidth * 1.2;
+                ctx.beginPath();
+                ctx.moveTo(marginLeft, eToY(state.B));
+                ctx.lineTo(marginLeft + chartW, eToY(state.B));
+                ctx.stroke();
+                
+                // Label
+                ctx.font = `bold ${labelFontSize}px Arial`;
+                ctx.fillStyle = '#FFD700';
+                ctx.fillText('B', marginLeft + chartW + 5, eToY(state.B) + 5);
+                ctx.fillText(state.B.toFixed(2), marginLeft + chartW + 30, eToY(state.B) + 5);
+            }
+            
+            // Échelle verticale principale (ligne blanche E)
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(marginLeft, marginTop);
+            ctx.lineTo(marginLeft, marginTop + chartH);
+            ctx.stroke();
+            
+            // Afficher info hover
+            if (hoverInfo) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                ctx.fillRect(hoverInfo.x + 10, hoverInfo.y - 30, 120, 25);
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px Arial';
+                ctx.fillText(hoverInfo.text, hoverInfo.x + 15, hoverInfo.y - 12);
+            }
+        }
+        
+        function calculateDelta() {
+            // Δ = min(E_PP, K₀ × M)
+            // Avec K₀ = 0.004
+            const K_0 = 0.004;
+            return Math.min(state.E_PP, K_0 * state.M);
+        }
+        
+        function updateTPSLPositions() {
+            // Ne pas recalculer si verrouillés - garder les valeurs strictes
+            if (state.tpLocked && state.slLocked) {
+                return;
+            }
+            
+            // Calculer les positions sur l'échelle E selon les % choisis
+            const delta = calculateDelta();
+            
+            // Lire les valeurs % depuis les inputs
+            const tpPercent = parseFloat(document.getElementById('tpPercentInput').value) || 0;
+            const slPercent = parseFloat(document.getElementById('slPercentInput').value) || 0;
+            
+            // Limiter les valeurs
+            const tpLimited = Math.max(0, Math.min(1000, tpPercent));
+            const slLimited = Math.max(0, Math.min(100, slPercent));
+            
+            // Calculer les positions E seulement si non verrouillés
+            if (!state.tpLocked) {
+                // B_tp = E_PP + Δ × (TP%/100)
+                state.TP = Math.min(10.00, state.E_PP + delta * (tpLimited / 100));
+            }
+            
+            if (!state.slLocked) {
+                // B_sl = E_PP - Δ × (SL%/100)
+                state.SL = Math.max(0.00, state.E_PP - delta * (slLimited / 100));
+            }
+            
+            calculateValues();
+            drawChart();
+        }
+        
+        function calculatePercentAtPosition(E_position, isTP) {
+            // Pour affichage : calculer le % à partir de la position E
+            const delta = calculateDelta();
+            
+            if (delta === 0) return 0;
+            
+            if (isTP) {
+                // X = (E_position - E_PP) / Δ
+                const X = (E_position - state.E_PP) / delta;
+                return X * 100;
+            } else {
+                // Y = (E_PP - E_position) / Δ
+                const Y = (state.E_PP - E_position) / delta;
+                return Y * 100;
+            }
+        }
+        
+        function calculateGainLossInDollars(E_current) {
+            // Calculer le pourcentage actuel
+            const percent = calculatePercentAtPosition(E_current, E_current >= state.E_PP);
+            
+            // FORMULE CORRECTE : Gain/Perte = M × (pourcentage / 100)
+            return state.M * (percent / 100);
+        }
+        
+        function onWheel(e) {
+            e.preventDefault();
+            
+            // Zoom in/out (limité à ~15x pour les centièmes)
+            const zoomFactor = 1.1;
+            if (e.deltaY < 0) {
+                // Zoom in (max 15x pour voir les centièmes clairement)
+                zoom.level = Math.min(zoom.level * zoomFactor, 15);
+            } else {
+                // Zoom out
+                zoom.level = Math.max(zoom.level / zoomFactor, 1);
+            }
+            
+            drawChart();
+        }
+        
+        function onKeyDown(e) {
+            // Touche A = Zoom IN
+            if (e.key === 'a' || e.key === 'A') {
+                zoom.level = Math.min(15, zoom.level * 1.2);
+                drawChart();
+                e.preventDefault();
+                return;
+            }
+            
+            // Touche S = Zoom OUT
+            if (e.key === 's' || e.key === 'S') {
+                zoom.level = Math.max(1, zoom.level / 1.2);
+                drawChart();
+                e.preventDefault();
+                return;
+            }
+            
+            if (e.key === 'ArrowUp') {
+                zoom.offsetY += 0.5 / zoom.level;
+                const eMax = 10;
+                const eMin = 0;
+                const visibleRange = (eMax - eMin) / zoom.level;
+                const maxOffset = (eMax - eMin) / 2 - visibleRange / 2;
+                zoom.offsetY = Math.min(zoom.offsetY, maxOffset);
+                drawChart();
+                e.preventDefault();
+            } else if (e.key === 'ArrowDown') {
+                zoom.offsetY -= 0.5 / zoom.level;
+                const eMax = 10;
+                const eMin = 0;
+                const visibleRange = (eMax - eMin) / zoom.level;
+                const maxOffset = (eMax - eMin) / 2 - visibleRange / 2;
+                zoom.offsetY = Math.max(zoom.offsetY, -maxOffset);
+                drawChart();
+                e.preventDefault();
+            }
+        }
+        
+        function startBMovement() {
+            // Initialiser le temps de départ
+            bMovement.timeInDirection = Date.now();
+            
+            function animate() {
+                // Calculer le temps écoulé
+                const elapsed = Date.now() - bMovement.timeInDirection;
+                
+                // Déterminer si on est en phase rapide ou lente
+                if (!bMovement.isFast && elapsed >= bMovement.slowDuration) {
+                    bMovement.isFast = true;
+                    bMovement.timeInDirection = Date.now();
+                } else if (bMovement.isFast && elapsed >= bMovement.fastDuration) {
+                    bMovement.isFast = false;
+                    bMovement.timeInDirection = Date.now();
+                    // Changer aléatoirement de direction
+                    if (Math.random() > 0.5) {
+                        bMovement.direction *= -1;
+                    }
+                }
+                
+                // Vitesse augmentée
+                const speed = bMovement.isFast ? 0.003 : 0.0003;
+                
+                // Mouvement aléatoire avec tendance
+                const randomness = (Math.random() - 0.5) * 0.0005;
+                state.B += (bMovement.direction * speed) + randomness;
+                
+                // Limites
+                if (state.B > 10) {
+                    state.B = 10;
+                    bMovement.direction = -1;
+                } else if (state.B < 0) {
+                    state.B = 0;
+                    bMovement.direction = 1;
+                }
+                
+                // Vérifier TP/SL si investissement actif
+                if (state.isRunning) {
+                    checkTPSL();
+                }
+                
+                // Mise à jour
+                updateUI();
+                drawChart();
+                
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            // Démarrer l'animation
+            animate();
+        }
+        
+        function onMouseDown(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const marginLeft = 80;
+            const marginTop = 40;
+            const marginBottom = 40;
+            const chartH = canvas.height - marginTop - marginBottom;
+            const chartW = canvas.width - marginLeft - 100;
+            
+            // Vérifier si on est dans la zone du graphique
+            const inChart = x > marginLeft && x < marginLeft + chartW && y > marginTop && y < marginTop + chartH;
+            
+            if (!inChart) return;
+            
+            // Shift+clic ou clic droit = pan (navigation)
+            if (e.shiftKey || e.button === 2) {
+                zoom.isPanning = true;
+                zoom.startY = y;
+                zoom.startOffsetY = zoom.offsetY;
+                canvas.style.cursor = 'grabbing';
+                e.preventDefault();
+                return;
+            }
+        }
+        
+        function onMouseMove(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const marginLeft = 80;
+            const marginTop = 40;
+            const marginBottom = 40;
+            const chartH = canvas.height - marginTop - marginBottom;
+            
+            const eMin = 0;
+            const eMax = 10;
+            const visibleRange = (eMax - eMin) / zoom.level;
+            const centerE = 5 + zoom.offsetY;
+            const viewMin = Math.max(eMin, centerE - visibleRange / 2);
+            const viewMax = Math.min(eMax, centerE + visibleRange / 2);
+            
+            // Convertir Y en valeur E
+            const eValue = viewMin + (1 - (y - marginTop) / chartH) * (viewMax - viewMin);
+            
+            // Mode pan (navigation)
+            if (zoom.isPanning) {
+                const deltaY = y - zoom.startY;
+                const deltaE = -(deltaY / chartH) * visibleRange;
+                zoom.offsetY = zoom.startOffsetY + deltaE;
+                
+                // Limites
+                const maxOffset = (eMax - eMin) / 2 - visibleRange / 2;
+                zoom.offsetY = Math.max(-maxOffset, Math.min(maxOffset, zoom.offsetY));
+                
+                drawChart();
+                return;
+            }
+            
+            // Afficher info au survol (optionnel)
+            if (x > marginLeft && x < canvas.width - 100 && y > marginTop && y < marginTop + chartH) {
+                let percent = 0;
+                let label = '';
+                
+                if (eValue > state.E_PP) {
+                    percent = calculatePercentAtPosition(eValue, true);
+                    label = `TP: ${percent.toFixed(2)}%`;
+                } else if (eValue < state.E_PP) {
+                    percent = calculatePercentAtPosition(eValue, false);
+                    label = `SL: ${percent.toFixed(2)}%`;
+                } else {
+                    label = `PP: 0.00%`;
+                }
+                
+                hoverInfo = { x, y, text: label };
+                drawChart();
+            } else {
+                if (hoverInfo) {
+                    hoverInfo = null;
+                    drawChart();
+                }
+            }
+        }
+        
+        function onMouseUp() {
+            zoom.isPanning = false;
+            canvas.style.cursor = 'crosshair';
+        }
+        
+        function toggleLockTP() {
+            if (state.isRunning) return; // Ne pas pouvoir déverrouiller pendant l'investissement
+            
+            state.tpLocked = !state.tpLocked;
+            const btn = document.getElementById('lockTPBtn');
+            const input = document.getElementById('tpPercentInput');
+            
+            if (state.tpLocked) {
+                btn.style.background = '#00ff00';
+                btn.style.color = '#000';
+                btn.textContent = 'TP VERROUILLÉ';
+                input.disabled = true;
+                updateTPSLPositions(); // Calculer la position sur l'échelle
+            } else {
+                btn.style.background = '#fff';
+                btn.style.color = '#000';
+                btn.textContent = 'VERROUILLER TP';
+                input.disabled = false;
+            }
+            updateStartButton();
+            saveUserData();
+        }
+        
+        function toggleLockSL() {
+            if (state.isRunning) return; // Ne pas pouvoir déverrouiller pendant l'investissement
+            
+            state.slLocked = !state.slLocked;
+            const btn = document.getElementById('lockSLBtn');
+            const input = document.getElementById('slPercentInput');
+            
+            if (state.slLocked) {
+                btn.style.background = '#ff0000';
+                btn.style.color = '#fff';
+                btn.textContent = 'SL VERROUILLÉ';
+                input.disabled = true;
+                updateTPSLPositions(); // Calculer la position sur l'échelle
+            } else {
+                btn.style.background = '#fff';
+                btn.style.color = '#000';
+                btn.textContent = 'VERROUILLER SL';
+                input.disabled = false;
+            }
+            updateStartButton();
+            saveUserData();
+        }
+        
+        function updateStartButton() {
+            const btn = document.getElementById('startBtn');
+            if (state.tpLocked && state.slLocked && !state.isRunning) {
+                btn.disabled = false;
+                btn.style.background = '#fff';
+                btn.style.color = '#000';
+                btn.style.cursor = 'pointer';
+            } else {
+                btn.disabled = true;
+                btn.style.background = '#555';
+                btn.style.color = '#999';
+                btn.style.cursor = 'not-allowed';
+            }
+        }
+        
+        function startInvestment() {
+            state.isRunning = true;
+            const btn = document.getElementById('startBtn');
+            btn.textContent = 'EN COURS...';
+            btn.disabled = true;
+            
+            // E_PP reste FIXE à 5.00 - NE PAS PRENDRE LA VALEUR DE B
+            state.E_PP = 5.0;
+            
+            calculateValues();
+            saveUserData();
+        }
+        
+        function checkTPSL() {
+            if (state.B >= state.TP) {
+                // TP atteint - GAIN
+                stopInvestment();
+                
+                // Calculer le pourcentage de gain
+                const tpPercent = calculatePercentAtPosition(state.TP, true);
+                
+                // FORMULE CORRECTE : Gain = M × (TP% / 100)
+                const gain = state.M * (tpPercent / 100);
+                
+                showNotification(`Vous avez gagné ${tpPercent.toFixed(2)}% de votre investissement de ${state.M.toFixed(2)}$ soit ${gain.toFixed(2)}$`);
+            } else if (state.B <= state.SL) {
+                // SL atteint - PERTE
+                stopInvestment();
+                
+                // Calculer le pourcentage de perte
+                const slPercent = calculatePercentAtPosition(state.SL, false);
+                
+                // FORMULE CORRECTE : Perte = M × (SL% / 100)
+                const loss = state.M * (slPercent / 100);
+                
+                showNotification(`Vous avez perdu ${slPercent.toFixed(2)}% de votre investissement de ${state.M.toFixed(2)}$ soit ${loss.toFixed(2)}$`);
+            }
+        }
+        
+        function stopInvestment() {
+            state.isRunning = false;
+        }
+        
+        function resetSimulation() {
+            // Reset complet pour une nouvelle simulation
+            state.isRunning = false;
+            state.tpLocked = false;
+            state.slLocked = false;
+            state.E_PP = 5.0;
+            state.B = 5.0 + (Math.random() - 0.5) * 2; // B aléatoire
+            
+            // Reset des boutons
+            const tpBtn = document.getElementById('lockTPBtn');
+            tpBtn.style.background = '#fff';
+            tpBtn.style.color = '#000';
+            tpBtn.textContent = 'VERROUILLER TP';
+            
+            const slBtn = document.getElementById('lockSLBtn');
+            slBtn.style.background = '#fff';
+            slBtn.style.color = '#000';
+            slBtn.textContent = 'VERROUILLER SL';
+            
+            const startBtn = document.getElementById('startBtn');
+            startBtn.textContent = 'DÉMARRER';
+            
+            // Réactiver les inputs
+            document.getElementById('tpPercentInput').disabled = false;
+            document.getElementById('slPercentInput').disabled = false;
+            
+            updateStartButton();
+            updateTPSLPositions();
+            calculateValues();
+            updateUI();
+            saveUserData();
+        }
+        
+        function showNotification(message) {
+            document.getElementById('notificationText').textContent = message;
+            document.getElementById('notification').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+        }
+        
+        function closeNotification() {
+            document.getElementById('notification').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+            resetSimulation(); // Reset complet après la notification
+        }
+        
+        function calculateValues() {
+            // Calculer Δ
+            const delta = calculateDelta();
+            
+            // Calculer TP en pourcentage et synchroniser l'input
+            const tpPercent = calculatePercentAtPosition(state.TP, true);
+            document.getElementById('tpPercent').textContent = tpPercent.toFixed(2);
+            document.getElementById('tpPercentInput').value = Math.round(tpPercent); // Synchroniser input
+            
+            // Calculer SL en pourcentage et synchroniser l'input
+            const slPercent = calculatePercentAtPosition(state.SL, false);
+            document.getElementById('slPercent').textContent = slPercent.toFixed(2);
+            document.getElementById('slPercentInput').value = Math.round(slPercent); // Synchroniser input
+            
+            // Calculer X actuel (gain/perte en % par rapport à B)
+            const currentPercent = calculatePercentAtPosition(state.B, state.B >= state.E_PP);
+            document.getElementById('xValue').textContent = currentPercent.toFixed(2);
+            
+            // Calculer gain/perte en dollars
+            const gainLoss = calculateGainLossInDollars(state.B);
+            
+            if (gainLoss >= 0) {
+                document.getElementById('gainValue').textContent = gainLoss.toFixed(2);
+                document.getElementById('lossValue').textContent = '0.00';
+            } else {
+                document.getElementById('lossValue').textContent = Math.abs(gainLoss).toFixed(2);
+                document.getElementById('gainValue').textContent = '0.00';
+            }
+            
+            document.getElementById('btpValue').textContent = state.TP.toFixed(2);
+            document.getElementById('bslValue').textContent = state.SL.toFixed(2);
+            
+            // Afficher Δ au lieu de K
+            document.getElementById('kValue').textContent = delta.toFixed(4);
+        }
+        
+        function updateUI() {
+            document.getElementById('bValue').value = state.B.toFixed(2);
+            document.getElementById('mValue').value = state.M.toFixed(2);
+            document.getElementById('lValue').value = state.L.toFixed(2);
+            document.getElementById('ppValue').textContent = state.E_PP.toFixed(2);
+            
+            calculateValues();
+        }
+        
+        // Events pour M et L
+        document.getElementById('mValue').addEventListener('input', (e) => {
+            let value = parseFloat(e.target.value);
+            if (isNaN(value) || value < 0.01) {
+                value = 0.01;
+                e.target.value = value.toFixed(2);
+            }
+            state.M = value;
+            updateTPSLPositions(); // Recalculer les positions
+            calculateValues();
+            saveUserData();
+        });
+        
+        document.getElementById('mValue').addEventListener('change', (e) => {
+            e.target.value = state.M.toFixed(2);
+        });
+        
+        document.getElementById('lValue').addEventListener('input', (e) => {
+            let value = parseFloat(e.target.value);
+            if (isNaN(value) || value < 0.01) {
+                value = 0.01;
+                e.target.value = value.toFixed(2);
+            }
+            state.L = value;
+            updateTPSLPositions(); // Recalculer les positions
+            calculateValues();
+            saveUserData();
+        });
+        
+        document.getElementById('lValue').addEventListener('change', (e) => {
+            e.target.value = state.L.toFixed(2);
+        });
+        
+        // Event listeners pour TP et SL %
+        document.getElementById('tpPercentInput').addEventListener('input', () => {
+            if (!state.tpLocked) {
+                updateTPSLPositions();
+            }
+        });
+        
+        document.getElementById('slPercentInput').addEventListener('input', () => {
+            if (!state.slLocked) {
+                updateTPSLPositions();
+            }
+        });
+    </script>
+    
+    <!-- Enregistrement du Service Worker pour PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker enregistré avec succès:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Échec enregistrement Service Worker:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
