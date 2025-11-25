@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>01001</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .splash-container {
+            text-align: center;
+            animation: fadeIn 0.8s ease-in-out;
+            padding: 0 5vw; /* Padding sur les côtés */
+        }
+
+        @media (min-width: 768px) {
+            .splash-container {
+                padding: 0;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .logo {
+            font-size: 15vw; /* Responsive: 15% de la largeur de l'écran */
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            margin-bottom: 5vh;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        /* Sur grand écran, limiter la taille */
+        @media (min-width: 768px) {
+            .logo {
+                font-size: 72px;
+                letter-spacing: 12px;
+                margin-bottom: 30px;
+            }
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            }
+            50% {
+                text-shadow: 0 0 40px rgba(255, 255, 255, 0.6);
+            }
+        }
+
+        .tagline {
+            font-size: 4vw; /* Responsive */
+            color: #888;
+            letter-spacing: 0.2em;
+            margin-bottom: 10vh;
+            font-weight: 500;
+        }
+
+        @media (min-width: 768px) {
+            .tagline {
+                font-size: 16px;
+                letter-spacing: 3px;
+                margin-bottom: 60px;
+            }
+        }
+
+        .loading-container {
+            width: 80%; /* 80% de l'écran */
+            max-width: 200px; /* Max 200px sur grand écran */
+            margin: 0 auto;
+        }
+
+        .loading-bar {
+            width: 100%;
+            height: 4px;
+            background: #1a1a1a;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: #ffffff;
+            width: 0%;
+            animation: loading 7.8s ease-in-out forwards;
+            border-radius: 2px;
+        }
+
+        @keyframes loading {
+            0% {
+                width: 0%;
+            }
+            100% {
+                width: 100%;
+            }
+        }
+
+        .loading-text {
+            font-size: 3.5vw; /* Responsive */
+            color: #666;
+            text-align: center;
+        }
+
+        @media (min-width: 768px) {
+            .loading-text {
+                font-size: 13px;
+            }
+        }
+
+        .click-message {
+            font-size: 3.5vw; /* Responsive */
+            color: #888;
+            text-align: center;
+            opacity: 0;
+            display: none;
+            transition: opacity 1s ease-in-out;
+            animation: pulse 2s infinite;
+            margin-top: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .click-message {
+                font-size: 14px;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        body.clickable {
+            cursor: pointer;
+        }
+
+        .dots {
+            display: inline-block;
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% {
+                content: '';
+            }
+            40% {
+                content: '.';
+            }
+            60% {
+                content: '..';
+            }
+            80%, 100% {
+                content: '...';
+            }
+        }
+
+        .version {
+            position: absolute;
+            bottom: 5vh;
+            font-size: 3vw;
+            color: #444;
+        }
+
+        @media (min-width: 768px) {
+            .version {
+                bottom: 30px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="splash-container">
+        <div class="logo">01001</div>
+        <div class="tagline">MICRO-INVESTISSEMENT</div>
+        
+        <div class="loading-container">
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+            <div class="loading-text" id="loadingText">
+                Chargement<span class="dots"></span>
+            </div>
+            <div class="click-message" id="clickMessage">Click to continue</div>
+        </div>
+    </div>
+
+    <div class="version">Version 1.0.0</div>
+
+    <script>
+        // Variable pour savoir si on peut cliquer
+        let canClick = false;
+
+        // Après 8 secondes: chargement terminé
+        setTimeout(() => {
+            // Cacher complètement le texte "Chargement"
+            const loadingText = document.getElementById('loadingText');
+            loadingText.style.opacity = '0';
+            loadingText.style.transition = 'opacity 0.5s';
+            
+            // Attendre que le fade out soit terminé
+            setTimeout(() => {
+                loadingText.style.display = 'none';
+                
+                // Maintenant afficher "Click to continue"
+                const clickMessage = document.getElementById('clickMessage');
+                clickMessage.style.display = 'block';
+                
+                // Petit délai puis fade in
+                setTimeout(() => {
+                    clickMessage.style.opacity = '1';
+                    canClick = true;
+                    document.body.classList.add('clickable');
+                }, 50);
+                
+            }, 500); // Attendre la fin du fade out (0.5s)
+            
+        }, 8000); // 8 secondes de chargement
+
+        // Gérer le clic sur tout le body
+        document.body.addEventListener('click', () => {
+            if (canClick) {
+                redirectToNextPage();
+            }
+        });
+
+        // Gérer les touches Enter et Espace
+        document.addEventListener('keydown', (e) => {
+            if (canClick && (e.key === 'Enter' || e.key === ' ' || e.code === 'Space')) {
+                e.preventDefault(); // Empêcher le scroll avec Espace
+                redirectToNextPage();
+            }
+        });
+
+        // Fonction pour rediriger vers la bonne page
+        function redirectToNextPage() {
+            // Vérifier si "Se souvenir de moi" est activé
+            const rememberMe = localStorage.getItem('01001_rememberMe');
+            const userData = localStorage.getItem('01001_user');
+            
+            if (rememberMe === 'true' && userData) {
+                // Utilisateur déjà connecté, aller directement à Main.html
+                window.location.href = 'Main.html';
+            } else {
+                // Pas de session, aller à Inscription.html
+                window.location.href = 'Inscription.html';
+            }
+        }
+    </script>
+</body>
+</html>
